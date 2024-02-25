@@ -130,49 +130,10 @@
                     <option value="Pop">Pop</option>
                     <option value="Rock">Rock</option>
                 </select>
-                <label for="searchKey">Key:</label>
-                <select class="form-select" id="searchKey" name="searchKey" aria-label="Default select example">
 
-                    <!-- <option value="Any">Any</option> -->
-                    <<option selected>Open this select meny</option>
-                        <option value="Major">Any Major</option>
-                        <option value="Minor">Any Minor</option>
-                        <option value="C">C Major</option>
-                        <option value="Cm">C Minor</option>
-                        <option value="C#">C# Major</option>
-                        <option value="C#m">C# Minor</option>
-                        <option value="Db">Db Major</option>
-                        <option value="Dbm">Db Minor</option>
-                        <option value="D">D Major</option>
-                        <option value="Dm">D Minor</option>
-                        <option value="D#">D# Major</option>
-                        <option value="D#m">D# Minor</option>
-                        <option value="Eb">Eb Major</option>
-                        <option value="Ebm">Eb Minor</option>
-                        <option value="E">E Major</option>
-                        <option value="Em">E Minor</option>
-                        <option value="F">F Major</option>
-                        <option value="Fm">F Minor</option>
-                        <option value="F#">F# Major</option>
-                        <option value="F#m">F# Minor</option>
-                        <option value="Gb">Gb Major</option>
-                        <option value="Gbm">Gb Minor</option>
-                        <option value="G">G Major</option>
-                        <option value="Gm">G Minor</option>
-                        <option value="G#">G# Major</option>
-                        <option value="G#m">G# Minor</option>
-                        <option value="Ab">Ab Major</option>
-                        <option value="Abm">Ab Minor</option>
-                        <option value="A">A Major</option>
-                        <option value="Am">A Minor</option>
-                        <option value="A#">A# Major</option>
-                        <option value="A#m">A# Minor</option>
-                        <option value="Bb">Bb Major</option>
-                        <option value="Bbm">Bb Minor</option>
-                        <option value="B">B Major</option>
-                        <option value="Bm">B Minor</option>
-                        <!-- Add more options for other keys -->
-                </select>
+                <label for="searchTitle">Key:</label>
+                <input class="form-control" type="text" id="searchKey" name="searchKey">
+
 
 
                 <label for="searchDifficulty">Difficulty Rating:</label>
@@ -412,53 +373,50 @@
 
             // Search by Key
             if (isset($_POST['searchKey']) && !empty($_POST['searchKey'])) {
-                $keyName = $_POST['searchKey'];
-
-                // Correcting the query to match the exact column name as in your database
-                $query = "SELECT * FROM pianodb WHERE PKey = ?"; // Ensure 'PKey' matches the column name exactly
-
+                // Ensure that composer name is not empty
+                $composerName = $_POST['searchKey'];
+                $query = "SELECT * FROM pianodb WHERE PKey LIKE ?";
                 if ($stmt = $conn->prepare($query)) {
-                    // Binding the parameter correctly
-                    $stmt->bind_param("s", $keyName); // 's' for string since key names are usually strings like 'C Major', 'D Minor', etc.
-
+                    $likeComposerName = "%" . $composerName . "%";
+                    $stmt->bind_param("s", $likeComposerName);
                     $stmt->execute();
                     $result = $stmt->get_result();
 
                     if ($result->num_rows > 0) {
                         echo '<table class="table table-dark table-hover">
-                    <thead>
-                        <tr>
-                            <th scope="col">Name</th>
-                            <th scope="col">Composer</th>
-                            <th scope="col">Genre</th>
-                            <th scope="col">Key</th>
-                            <th scope="col">Year</th>
-                            <th scope="col">Difficulty</th>
-                            <th scope="col">Youtube Link</th>
-                        </tr>
-                    </thead>
-                    <tbody>';
-
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Name</th>
+                                        <th scope="col">Composer</th>
+                                        <th scope="col">Genre</th>
+                                        <th scope="col">Key</th>
+                                        <th scope="col">Year</th>
+                                        <th scope="col">Difficulty</th>
+                                        <th scope="col">Youtube Link</th>
+                                    </tr>
+                                </thead>
+                                <tbody>';
                         while ($row = $result->fetch_assoc()) {
                             echo "<tr>
-                        <td>{$row['Name']}</td>
-                        <td>{$row['Composer']}</td>
-                        <td>{$row['Genre']}</td>
-                        <td>{$row['PKey']}</td>
-                        <td>{$row['PublishDate']}</td>
-                        <td>{$row['Difficulty']}</td>
-                        <td><a href='{$row['YTubeLink']}' target='_blank'>Link</a></td>
-                      </tr>";
+                                    <td>{$row['Name']}</td>
+                                    <td>{$row['Composer']}</td>
+                                    <td>{$row['Genre']}</td>
+                                    <td>{$row['PKey']}</td>
+                                    <td>{$row['PublishDate']}</td>
+                                    <td>{$row['Difficulty']}</td>
+                                    <td><a href='{$row['YTubeLink']}' target='_blank'>Link</a></td>
+                                  </tr>";
                         }
                         echo '</tbody></table>';
                     } else {
-                        echo 'No results found for the specified key.';
+                        echo 'No results found for the specified composer.';
                     }
                     $stmt->close();
                 } else {
-                    echo "Couldn't prepare statement for key search.";
+                    echo "Couldn't prepare statement.";
                 }
             }
+
 
 
             // Search by Difficulty Rating
